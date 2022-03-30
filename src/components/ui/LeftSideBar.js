@@ -1,20 +1,18 @@
-import {
-    Box,
-    Divider,
-    Drawer,
-    List,
-    ListItem,
-    ListItemIcon,
-    ListItemText,
-    Toolbar
-} from '@material-ui/core';
+import { Box, Divider, Drawer, List, ListItem, ListItemIcon, ListItemText, Toolbar } from '@mui/material';
+import { useHistory } from 'react-router-dom';
+
+// Mis imports
+import { leftMenuItems } from '../../helpers/leftMenu';
 
 const drawerWidth = 240;
 
 export const LeftSideBar = () => {
+
+    const history = useHistory();
+
     return (
         <Drawer
-            variant="permanent"
+            variant='permanent'
             sx={{
                 width: drawerWidth,
                 flexShrink: 0,
@@ -24,25 +22,28 @@ export const LeftSideBar = () => {
             <Toolbar />
             <Box sx={{ overflow: 'auto' }}>
                 <List>
-                    {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-                        <ListItem button key={text}>
-                            {/* <ListItemIcon>
-                                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                            </ListItemIcon> */}
-                            <ListItemText primary={text} />
-                        </ListItem>
-                    ))}
-                </List>
-                <Divider />
-                <List>
-                    {['All mail', 'Trash', 'Spam'].map((text, index) => (
-                        <ListItem button key={text}>
-                            {/* <ListItemIcon>
-                                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                            </ListItemIcon> */}
-                            <ListItemText primary={text} />
-                        </ListItem>
-                    ))}
+                    <Divider
+                        textAlign='left'
+                        sx={{ pt: 2, fontWeight: 'bold' }}
+                    >
+                        Estadísticas
+                    </Divider>
+                    {
+                        leftMenuItems.map(
+                            (menu, index) => (
+                                <ListItem
+                                    button
+                                    key={index}
+                                    onClick={() => history.push(menu.url)}
+                                >
+                                    <ListItemIcon>{menu.icon}</ListItemIcon>
+                                    <ListItemText
+                                        primary={menu.title}
+                                    />
+                                </ListItem>
+                            )
+                        )
+                    }
                 </List>
             </Box>
         </Drawer>

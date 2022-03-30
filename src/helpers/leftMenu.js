@@ -5,16 +5,16 @@ export const leftMenuItems = [
     {
         title: 'Facebook',
         icon: AppIcons.fb,
-        url: '',
+        url: 'facebook',
     },
     {
         title: 'Instagram',
         icon: AppIcons.in,
-        url: '',
+        url: '/instagram',
     },
     {
         title: 'Twitter',
         icon: AppIcons.tw,
-        url: '/service',
+        url: '/twitter',
     },
 ];

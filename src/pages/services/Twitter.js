@@ -17,28 +17,20 @@ import { AppIcons } from '../../helpers/AppIcons';
 // Datos
 import sentimentsData from '../../assets/jsons/sentiment.json';
 
-const oSentiments = JSON.parse(sentimentsData);
-// console.log(oSentiments);
+const sentiments = JSON.parse(sentimentsData);
+// console.log(sentiments);
 
 let data = [];
 let totalPos = 0;
 let totalNeg = 0;
 let totalUnd = 0;
 
-oSentiments.forEach(e => {
-    switch (e.sentiment_pred) {
-        case 'Positive':
-            totalPos++;
-            break;
-        case 'Undetermined':
-            totalNeg++;
-            break;
-        case 'Negative':
-            totalUnd++;
-            break;
-        default:
-            console.log(e.sentiment_pred);
-            break;
+sentiments.filter(sentiment => {
+    switch (sentiment.sentiment_pred) {
+        case 'Positive': totalPos++; break;
+        case 'Undetermined': totalUnd++; break;
+        case 'Negative': totalNeg++; break;
+        default: console.log(sentiment.sentiment_pred); break;
     }
     // console.log({ totalNeg, totalPos });
 });
@@ -55,7 +47,7 @@ data.push(
 //     amt: 0
 // });
 
-console.log(data);
+// console.log(data);
 
 export const Twitter = () => {
 
@@ -81,7 +73,7 @@ export const Twitter = () => {
                     <form
                         // onSubmit={this.handleSubmit}
                         id="paramForm"
-                        method="post"
+                        method="post" date
                     >
                         <div className='intro'>
                             <TextField
@@ -102,11 +94,10 @@ export const Twitter = () => {
                                 id="txtTopics"
                                 label="Temas"
                                 multiline
-                                cols="50"
-                                rows="5"
-                                value={''}
                                 onChange={handleInputChange}
+                                rows="5"
                                 size="small"
+                                value={''}
                             />
                         </div>
                         <br />
@@ -124,6 +115,7 @@ export const Twitter = () => {
                             <br />
                             <div>
                                 <DatePicker
+                                    variant="inline"
                                     label="Fecha hasta"
                                     onChange={handleDateChange}
                                     renderInput={

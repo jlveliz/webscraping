@@ -10,7 +10,7 @@ services:
     environment:
      - PORT=8080
     volumes:
-      - $PWD/.npm/:/root/.npm
+      - $PWD/../.npm/:/root/.npm
       - $PWD/:/root/react
     networks:
       - net

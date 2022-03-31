@@ -10,13 +10,15 @@ import {
     TextField,
     Typography
 } from '@mui/material';
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from 'recharts';
+import { Grid } from '@material-ui/core';
 
+// Mis imports
 import { AppIcons } from '../../helpers/AppIcons';
-
 // Datos
 import sentimentsData from '../../assets/jsons/sentiment.json';
-
+import { useForm } from '../../hooks/useForm';
+import { useState } from 'react';
 const sentiments = JSON.parse(sentimentsData);
 // console.log(sentiments);
 
@@ -33,6 +35,7 @@ sentiments.filter(sentiment => {
         default: console.log(sentiment.sentiment_pred); break;
     }
     // console.log({ totalNeg, totalPos });
+    return sentiment;
 });
 
 data.push(
@@ -50,103 +53,141 @@ data.push(
 // console.log(data);
 
 export const Twitter = () => {
+    const initState = {
+        twitterUser: '',
+        replies: false,
+        topics: '',
+        startDate: '',
+        endDate: '',
+    };
+    const [formValues, handleInputChange] = useForm(initState);
+    const {twitterUser, replies, topics, startDate, endDate} = formValues;
 
-    const handleInputChange = (e) => {
-        console.log(e.target);
-    }
+    console.log(formValues);
 
+    // Funciones
     const handleDateChange = () => {
         console.log('aqui tamos');
     }
 
     return (
         <>
-            <Card sx={{ minWidth: 275 }}>
-                <CardContent>
-                    <Typography
-                        variant="h2"
-                        gutterBottom
-                    >
-                        Twitter
+            <Grid
+                container
+                spacing={2}
+                direction="row"
+                justifyContent="flex-end"
+                alignItems="center"
+            >
+                <Grid item sm={6}>
+
+
+                    <Card sx={{ minWidth: 275 }}>
+                        <CardContent>
+                            <Typography
+                                variant="h2"
+                                gutterBottom
+                            >
+                                Twitter
+                                <Divider />
+                            </Typography>
+                            <form
+                                // onSubmit={this.handleSubmit}
+                                id="paramForm"
+                                method="post" date
+                            >
+                                <div className='intro'>
+                                    <TextField
+                                        id="txtTwitterUser"
+                                        name='twitterUser'
+                                        label="Twitter user"
+                                        // variant="standard"
+                                        size="small"
+                                        value={twitterUser}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+                                <label htmlFor="replies">Obtener Replies&nbsp;</label>
+                                <Checkbox
+                                    inputProps={{
+                                        'aria-label': 'controlled',
+                                        name: 'replicar',
+                                        checked: replies
+                                    }}
+                                />
+                                <br />
+                                <div>
+                                    <TextField
+                                        id="txtTopics"
+                                        name='topics'
+                                        label="Temas"
+                                        multiline
+                                        rows="5"
+                                        size="small"
+                                        onChange={handleInputChange}
+                                        value={topics}
+                                    />
+                                </div>
+                                <br />
+                                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                    <div>
+                                        <DatePicker
+                                            variant="inline"
+                                            label="Fecha desde"
+                                            onChange={handleDateChange}
+                                            renderInput={
+                                                (params) => <TextField
+                                                    {...params}
+                                                    size="small"
+                                                    name='startDate'
+                                                    value={startDate}
+                                                />
+                                            }
+                                        />
+                                    </div>
+                                    <br />
+                                    <div>
+                                        <DatePicker
+                                            variant="inline"
+                                            label="Fecha hasta"
+                                            onChange={handleDateChange}
+                                            renderInput={
+                                                (params) => <TextField
+                                                    {...params}
+                                                    size="small"
+                                                    name='endDate'
+                                                    value={endDate}
+                                                />
+                                            }
+                                        />
+                                    </div>
+                                </LocalizationProvider>
+                                <div id="inner_med">
+                                    <span>
+                                        {/* {procesando} */}
+                                    </span>
+                                </div>
+                                <br />
+                            </form>
+                        </CardContent>
                         <Divider />
-                    </Typography>
-                    <form
-                        // onSubmit={this.handleSubmit}
-                        id="paramForm"
-                        method="post" date
-                    >
-                        <div className='intro'>
-                            <TextField
-                                id="txtTwitterUser"
-                                label="Twitter user"
-                                // variant="standard"
-                                onChange={handleInputChange}
-                                size="small"
-                            />
-                        </div>
-                        <label htmlFor="replies">Obtener Replies&nbsp;</label>
-                        <Checkbox
-                            inputProps={{ 'aria-label': 'controlled' }}
-                        />
-                        <br />
-                        <div>
-                            <TextField
-                                id="txtTopics"
-                                label="Temas"
-                                multiline
-                                onChange={handleInputChange}
-                                rows="5"
-                                size="small"
-                                value={''}
-                            />
-                        </div>
-                        <br />
-                        <LocalizationProvider dateAdapter={AdapterDateFns}>
-                            <div>
-                                <DatePicker
-                                    variant="inline"
-                                    label="Fecha desde"
-                                    onChange={handleDateChange}
-                                    renderInput={
-                                        (params) => <TextField {...params} size="small" />
-                                    }
-                                />
-                            </div>
-                            <br />
-                            <div>
-                                <DatePicker
-                                    variant="inline"
-                                    label="Fecha hasta"
-                                    onChange={handleDateChange}
-                                    renderInput={
-                                        (params) => <TextField {...params} size="small" />
-                                    }
-                                />
-                            </div>
-                        </LocalizationProvider>
-                        <div id="inner_med">
-                            <span>
-                                {/* {procesando} */}
-                            </span>
-                        </div>
-                        <br />
-                    </form>
-                </CardContent>
-                <Divider />
-                <CardActions sx={{
-                    mx: 'auto',
-                    width: 200,
-                }}>
-                    <Button
-                        variant="contained"
-                        size="large"
-                        startIcon={AppIcons.search}
-                    >Buscar</Button>
-                </CardActions>
-            </Card>
-            <br />
-            <Card>
-                <CardContent>
+                        <CardActions sx={{
+                            mx: 'auto',
+                            width: 200,
+                        }}>
+                            <Button
+                                variant="contained"
+                                size="large"
+                                startIcon={AppIcons.search}
+                            >Buscar</Button>
+                        </CardActions>
+                    </Card>
+
+
+                </Grid>
+                <Grid item lg={6}>
+
+
                     <Typography variant="h6">
                         Todos
                     </Typography>
@@ -168,8 +209,10 @@ export const Twitter = () => {
                         <Legend />
                         <Bar dataKey="pv" fill="#8884d8" name='#ADNESPOL' />
                     </BarChart>
-                </CardContent>
-            </Card>
+
+
+                </Grid>
+            </Grid>
         </>
     )
 }

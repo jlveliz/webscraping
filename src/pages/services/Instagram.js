@@ -10,6 +10,7 @@ import { /*useEffect,*/ useState } from 'react';
 import { AppIcons } from '../../helpers/AppIcons';
 import { getInstagramValues } from '../../helpers/getInstagramValues';
 import { useForm } from '../../hooks/useForm';
+import Swal from 'sweetalert2';
 
 const columns = [
     { field: '_id', headerName: 'ID', width: 20 },
@@ -35,13 +36,35 @@ export const Instagram = () => {
     const [rows, setRows] = useState([]);
 
     // useEffect(() => {
-        // rows = getInstagramValues(formValues);
+    // rows = getInstagramValues(formValues);
     // });
+
+    const validate = ({ user, numpages, startdate, endtdate, topics }) => {
+        if (topics === '') {
+            Swal.fire('Error', 'Debe ingresar uno o mas temas de busqueda', 'error');
+            return false;
+        }
+        if (user === '') {
+            Swal.fire('Error', 'Debe ingresar el usuario de Instagram a obtener datos', 'error');
+            return false;
+        }
+        // if (fi > ff) {
+        //     alert('La fecha final debe ser mayor a la inicial');
+        //     return;
+        // }
+        if (numpages > 300 || numpages < 1){
+            Swal.fire('Error', 'Debe ingresar numero de paginas entre 1 y 300', 'error');
+            return true;
+        }
+
+        return true;
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
         // console.log(formValues);
-        setRows(getInstagramValues(formValues));
+        const isValidated = validate(formValues);
+        if(isValidated) setRows(getInstagramValues(formValues));
         // console.log(rows);
     }
 
@@ -145,8 +168,8 @@ export const Instagram = () => {
             <DataGrid getRowId={row => row._id}
                 rows={rows}
                 columns={columns}
-                pageSize={(numpages *1)}
-                rowsPerPageOptions={[(numpages *1)]}
+                pageSize={(numpages * 1)}
+                rowsPerPageOptions={[(numpages * 1)]}
             // checkboxSelections
             />
         </>

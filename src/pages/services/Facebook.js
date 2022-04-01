@@ -16,7 +16,7 @@ const columns = [
     { field: 'Text', headerName: 'PUBLICACIONES', width: 350 },
   ];
 
-console.log(rows[210]);
+// console.log(rows[210]);
 
 export const Facebook = () => {
     return (

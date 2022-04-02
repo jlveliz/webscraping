@@ -1,123 +1,205 @@
 import { DatePicker, LocalizationProvider } from '@mui/lab';
+import { Button, Card, CardContent, Divider, Grid, TextField, Typography } from '@mui/material';
+import { blue } from '@mui/material/colors';
+import { useState } from 'react';
+import moment from 'moment';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
-import { Button, Card, CardActions, CardContent, Divider, Grid, TextField, Typography } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
+import locale from 'date-fns/locale/es'
+import Swal from 'sweetalert2';
 
-
+// Mis importaciones
+import { useForm } from '../../hooks/useForm';
 import { AppIcons } from '../../helpers/AppIcons';
-import facebookData from '../../assets/jsons/sentiment_facebook.json';
+import { getInstagramValues } from '../../helpers/getInstagramValues';
+import { Bar, BarChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from 'recharts';
 
-const rows = facebookData.map((data, index)=>({...data, _id: index }));
-const columns = [
-    { field: '_id', headerName: 'ID', width: 20 },
-    { field: 'Username', headerName: 'USUARIO', width: 75 },
-    { field: 'date', headerName: 'FECHA', width: 100 },
-    { field: 'tema', headerName: 'TEMA', width: 120 },
-    { field: 'Text', headerName: 'PUBLICACIONES', width: 350 },
-  ];
-
-// console.log(rows[210]);
+const xAxisColor = blue['A700'];
+const today = new Date();
+const initState = {
+    user: '',
+    numpages: '10',
+    startdate: moment(today).format('L'),
+    enddate: moment(today).add(1, 'days').format('L'),
+    topics: '',
+}
 
 export const Facebook = () => {
+    const [formValues, handleInputChange] = useForm(initState);
+    const { user, numpages, startdate, enddate, topics } = formValues;
+    const [chartsData, setChartsData] = useState([]);
+
+    const validate = ({ user, numpages, startdate, enddate, topics }) => {
+        const checkDate = () => {
+            const mStart = moment(moment(startdate, 'dd/mm/yyyy'));
+            const mEnd = moment(moment(enddate, 'dd/mm/yyyy'));
+            return mEnd.isBefore(mStart);
+        }
+
+        if (user === '') {
+            Swal.fire('Error', 'Debe ingresar el usuario de Instagram a obtener datos', 'error');
+            return false;
+        }
+
+        if (numpages > 50 || numpages < 1) {
+            Swal.fire('Error', 'Debe ingresar numero de paginas entre 1 y 300', 'error');
+            return true;
+        }
+
+        if (checkDate()) {
+            Swal.fire('Error', 'La fecha final debe ser mayor a la inicial', 'error');
+            return false;
+        }
+
+        if (topics === '') {
+            Swal.fire('Error', 'Debe ingresar uno o mas temas de busqueda', 'error');
+            return false;
+        }
+
+        return true;
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        const isValidated = validate(formValues);
+
+        if (isValidated) setChartsData(getInstagramValues(formValues));
+        // console.log(rows);
+    }
+
     return (
-        <Card>
-            <CardContent>
-                <Typography variant="h4" gutterBottom>
-                    Facebook
-                    <Divider />
-                </Typography>
-                <Grid container spacing={1}>
-                    <Grid item sm={6}>
-                        <form
-                            // onSubmit={this.handleSubmit}
-                            id="paramForm"
-                            method="post"
-                        >
-                            <Grid container spacing={2}>
-                                <Grid item sm={3}>
-                                    <TextField
-                                        size='small'
-                                        id="txtUser"
-                                        // value={user || ''}
-                                        label="Usuario"
-                                    // onChange={this.handleUserChange}
-                                    // style={{ width: '150px', height: '20px' }}
-                                    />
-                                </Grid>
-                                <Grid item sm={3}>
-                                    <TextField
-                                        size='small'
-                                        id="txtNumPages"
-                                        label="#"
-                                        // value={num_paginas}
-                                        type='number'
-                                    // onChange={this.handleNumPaginasChange}
-                                    // style={{ width: '50px', height: '20px' }}
-                                    />
-                                </Grid>
-                                <Grid item sm={3}>
-                                    <TextField
-                                        size='small'
-                                        id="txtStartDate"
-                                        name='startDate'
-                                        label="Fecha desde"
-                                    // type="date"
-                                    // onChange={handleInputChange}
-                                    // value={startDate}
-                                    />
-                                </Grid>
-                                <Grid item sm={3}>
-                                    <TextField
-                                        size='small'
-                                        id="txtEndDate"
-                                        name='endtDate'
-                                        label="Fecha hasta"
-                                    // type="date"
-                                    // onChange={handleInputChange}
-                                    // value={endDate}
-                                    />
-                                </Grid>
+        <>
+            <Card>
+                <CardContent>
+                    <Typography variant='h4' gutterBottom>
+                        Facebook
+                        <Divider />
+                    </Typography>
+                    <form
+                        onSubmit={handleSubmit}
+                        id='paramForm'
+                        method='post'
+                    >
+                        <Grid container spacing={2}>
+                            <Grid item sm={4}>
+                                <TextField
+                                    id='txtUser'
+                                    name='user'
+                                    size='small'
+                                    label='Usuario'
+                                    onChange={handleInputChange}
+                                    value={user}
+                                />
                             </Grid>
-                            <br />
-                            <TextField
-                                size='small'
-                                id="txtTopics"
-                                label="Temas"
-                                multiline
-                                cols="50"
-                                rows="5"
-                                // value={temas || ''}
-                                // onChange={this.handleTemasChange}
-                                // onKeyDown={this.onKeyPress}
-                                sx={{
-                                    width: '100%'
-                                }}
-                            />
-                        </form>
+                            <Grid item sm={2}>
+                                <TextField
+                                    id='txtNumPages'
+                                    name='numpages'
+                                    label='# páginas'
+                                    size='small'
+                                    type='number'
+                                    onChange={handleInputChange}
+                                    value={numpages}
+                                />
+                            </Grid>
+                            <Grid item sm={3}>
+                                <LocalizationProvider dateAdapter={AdapterDateFns} locale={locale}>
+                                    <DatePicker
+                                        // id='txtStartDate'
+                                        // name='enddate'
+                                        renderInput={(props) => <TextField {...props} size='small' />}
+                                        label='Fecha desde'
+                                        value={startdate}
+                                        onChange={
+                                            (selectedDate) => {
+                                                handleInputChange({
+                                                    target: {
+                                                        name: 'startdate',
+                                                        value: moment(selectedDate).format('L')
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    />
+                                </LocalizationProvider>
+                            </Grid>
+                            <Grid item sm={3}>
+                                <LocalizationProvider dateAdapter={AdapterDateFns} locale={locale}>
+                                    <DatePicker
+                                        // id='txtEndDate'
+                                        // name='enddate'
+                                        renderInput={(props) => <TextField {...props} size='small' />}
+                                        label='Fecha hasta'
+                                        value={enddate}
+                                        onChange={
+                                            (selectedDate) => handleInputChange({
+                                                target: {
+                                                    name: 'enddate',
+                                                    value: moment(selectedDate).format('L')
+                                                }
+                                            })
+                                        }
+                                    />
+                                </LocalizationProvider>
+                            </Grid>
+                        </Grid>
                         <br />
+                        <TextField
+                            id='txtTopics'
+                            name='topics'
+                            label='Temas'
+                            multiline
+                            cols='50'
+                            rows='5'
+                            size='small'
+                            onChange={handleInputChange}
+                            value={topics}
+                            // onKeyDown={this.onKeyPress}
+                            sx={{
+                                width: '100%',
+                                marginBottom: '8px'
+                            }}
+                        />
                         <Button
-                            variant="contained"
-                            size="large"
+                            size='large'
+                            type='submit'
+                            variant='contained'
                             startIcon={AppIcons.search}
                         >Ver</Button>
-                    </Grid>
-                    <Grid item sm={6}>
-                        <DataGrid getRowId={row => row._id}
-                            rows={rows}
-                            columns={columns}
-                            pageSize={10}
-                            rowsPerPageOptions={[10]}
-                            // checkboxSelections
-                        />
-                    </Grid>
-                </Grid>
-            </CardContent>
-            {/* <Divider />
-            <CardActions sx={{
-                mx: 'auto',
-                width: 200,
-            }}>
-            </CardActions> */}
-        </Card>
+                    </form>
+                </CardContent>
+            </Card>
+            <br />
+            <Grid container spacing={1}>
+                {
+                    chartsData.map(
+                        (chart) => (
+                            <Grid item md key={chart._id}>
+                                <h1>{chart.title}</h1>
+                                <BarChart
+                                    width={800}
+                                    height={300}
+                                    data={chart.chartValues}
+                                    margin={{
+                                        top: 5,
+                                        right: 30,
+                                        left: 20,
+                                        bottom: 5,
+                                    }}
+                                >
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="name" fontSize={14} />
+                                    <YAxis />
+                                    <Tooltip />
+                                    <Legend />
+                                    {/* <Bar dataKey="pv" fill="#8884d8" name='#ADNESPOL' /> */}
+                                    <Bar dataKey="total" fill={xAxisColor} opacity={0.7} />
+                                </BarChart>
+                            </Grid>
+                        )
+                    )
+                }
+            </Grid>
+        </>
     )
 }

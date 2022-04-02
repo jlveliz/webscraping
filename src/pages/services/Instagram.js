@@ -1,6 +1,6 @@
 import { DatePicker, LocalizationProvider } from '@mui/lab';
 import { Button, Card, CardContent, Divider, Grid, TextField, Typography } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
+import { blue } from '@mui/material/colors';
 import { useState } from 'react';
 import moment from 'moment';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
@@ -8,18 +8,12 @@ import locale from 'date-fns/locale/es'
 import Swal from 'sweetalert2';
 
 // Mis importaciones
+import { useForm } from '../../hooks/useForm';
 import { AppIcons } from '../../helpers/AppIcons';
 import { getInstagramValues } from '../../helpers/getInstagramValues';
-import { useForm } from '../../hooks/useForm';
+import { Bar, BarChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from 'recharts';
 
-const columns = [
-    { field: '_id', headerName: 'ID', width: 20 },
-    { field: 'Username', headerName: 'USUARIO', width: 125 },
-    { field: 'date', headerName: 'FECHA', width: 100 },
-    { field: 'tema', headerName: 'TEMA', width: 120 },
-    { field: 'Text', headerName: 'PUBLICACIONES', width: 800 },
-];
-
+const xAxisColor = blue['A700'];
 const today = new Date();
 const initState = {
     user: '',
@@ -32,30 +26,33 @@ const initState = {
 export const Instagram = () => {
     const [formValues, handleInputChange] = useForm(initState);
     const { user, numpages, startdate, enddate, topics } = formValues;
-    const [rows, setRows] = useState([]);
+    const [chartsData, setChartsData] = useState([]);
 
     const validate = ({ user, numpages, startdate, enddate, topics }) => {
-        const chekDate = () => {
+        const checkDate = () => {
             const mStart = moment(moment(startdate, 'dd/mm/yyyy'));
             const mEnd = moment(moment(enddate, 'dd/mm/yyyy'));
-            return mStart.isBefore(mEnd);
+            return mEnd.isBefore(mStart);
+        }
+
+        if (user === '') {
+            Swal.fire('Error', 'Debe ingresar el usuario de Instagram a obtener datos', 'error');
+            return false;
+        }
+
+        if (numpages > 50 || numpages < 1) {
+            Swal.fire('Error', 'Debe ingresar numero de paginas entre 1 y 300', 'error');
+            return true;
+        }
+
+        if (checkDate()) {
+            Swal.fire('Error', 'La fecha final debe ser mayor a la inicial', 'error');
+            return false;
         }
 
         if (topics === '') {
             Swal.fire('Error', 'Debe ingresar uno o mas temas de busqueda', 'error');
             return false;
-        }
-        if (user === '') {
-            Swal.fire('Error', 'Debe ingresar el usuario de Instagram a obtener datos', 'error');
-            return false;
-        }
-        if (chekDate()) {
-            Swal.fire('Error', 'La fecha final debe ser mayor a la inicial', 'error');
-            return false;
-        }
-        if (numpages > 50 || numpages < 1) {
-            Swal.fire('Error', 'Debe ingresar numero de paginas entre 1 y 300', 'error');
-            return true;
         }
 
         return true;
@@ -66,7 +63,7 @@ export const Instagram = () => {
 
         const isValidated = validate(formValues);
 
-        if (isValidated) setRows(getInstagramValues(formValues));
+        if (isValidated) setChartsData(getInstagramValues(formValues));
         // console.log(rows);
     }
 
@@ -108,8 +105,8 @@ export const Instagram = () => {
                             <Grid item sm={3}>
                                 <LocalizationProvider dateAdapter={AdapterDateFns} locale={locale}>
                                     <DatePicker
-                                        id='txtStartDate'
-                                        name='enddate'
+                                        // id='txtStartDate'
+                                        // name='enddate'
                                         renderInput={(props) => <TextField {...props} size='small' />}
                                         label='Fecha desde'
                                         value={startdate}
@@ -129,8 +126,8 @@ export const Instagram = () => {
                             <Grid item sm={3}>
                                 <LocalizationProvider dateAdapter={AdapterDateFns} locale={locale}>
                                     <DatePicker
-                                        id='txtEndDate'
-                                        name='enddate'
+                                        // id='txtEndDate'
+                                        // name='enddate'
                                         renderInput={(props) => <TextField {...props} size='small' />}
                                         label='Fecha hasta'
                                         value={enddate}
@@ -173,13 +170,36 @@ export const Instagram = () => {
                 </CardContent>
             </Card>
             <br />
-            <DataGrid getRowId={row => row._id}
-                rows={rows}
-                columns={columns}
-                pageSize={10}
-                rowsPerPageOptions={[10]}
-            // checkboxSelections
-            />
+            <Grid container spacing={1}>
+                {
+                    chartsData.map(
+                        (chart) => (
+                            <Grid item md key={chart._id}>
+                                <h1>{chart.title}</h1>
+                                <BarChart
+                                    width={800}
+                                    height={300}
+                                    data={chart.chartValues}
+                                    margin={{
+                                        top: 5,
+                                        right: 30,
+                                        left: 20,
+                                        bottom: 5,
+                                    }}
+                                >
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="name" fontSize={14} />
+                                    <YAxis />
+                                    <Tooltip />
+                                    <Legend />
+                                    {/* <Bar dataKey="pv" fill="#8884d8" name='#ADNESPOL' /> */}
+                                    <Bar dataKey="total" fill={xAxisColor} opacity={0.7} />
+                                </BarChart>
+                            </Grid>
+                        )
+                    )
+                }
+            </Grid>
         </>
     )
 }

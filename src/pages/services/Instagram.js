@@ -1,16 +1,16 @@
-import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import { DatePicker, LocalizationProvider } from '@mui/lab';
 import { Button, Card, CardContent, Divider, Grid, TextField, Typography } from '@mui/material';
-
 import { DataGrid } from '@mui/x-data-grid';
+import { useState } from 'react';
 import moment from 'moment';
-import { /*useEffect,*/ useState } from 'react';
+import AdapterDateFns from '@mui/lab/AdapterDateFns';
+import locale from 'date-fns/locale/es'
+import Swal from 'sweetalert2';
 
 // Mis importaciones
 import { AppIcons } from '../../helpers/AppIcons';
 import { getInstagramValues } from '../../helpers/getInstagramValues';
 import { useForm } from '../../hooks/useForm';
-import Swal from 'sweetalert2';
 
 const columns = [
     { field: '_id', headerName: 'ID', width: 20 },
@@ -25,21 +25,22 @@ const initState = {
     user: '',
     numpages: '10',
     startdate: moment(today).format('L'),
-    endtdate: moment(today).add(1, 'days').format('L'),
+    enddate: moment(today).add(1, 'days').format('L'),
     topics: '',
 }
-// console.log(instagramData);
 
 export const Instagram = () => {
     const [formValues, handleInputChange] = useForm(initState);
-    const { user, numpages, startdate, endtdate, topics } = formValues;
+    const { user, numpages, startdate, enddate, topics } = formValues;
     const [rows, setRows] = useState([]);
 
-    // useEffect(() => {
-    // rows = getInstagramValues(formValues);
-    // });
+    const validate = ({ user, numpages, startdate, enddate, topics }) => {
+        const chekDate = () => {
+            const mStart = moment(moment(startdate, 'dd/mm/yyyy'));
+            const mEnd = moment(moment(enddate, 'dd/mm/yyyy'));
+            return mStart.isBefore(mEnd);
+        }
 
-    const validate = ({ user, numpages, startdate, endtdate, topics }) => {
         if (topics === '') {
             Swal.fire('Error', 'Debe ingresar uno o mas temas de busqueda', 'error');
             return false;
@@ -48,11 +49,11 @@ export const Instagram = () => {
             Swal.fire('Error', 'Debe ingresar el usuario de Instagram a obtener datos', 'error');
             return false;
         }
-        // if (fi > ff) {
-        //     alert('La fecha final debe ser mayor a la inicial');
-        //     return;
-        // }
-        if (numpages > 300 || numpages < 1){
+        if (chekDate()) {
+            Swal.fire('Error', 'La fecha final debe ser mayor a la inicial', 'error');
+            return false;
+        }
+        if (numpages > 50 || numpages < 1) {
             Swal.fire('Error', 'Debe ingresar numero de paginas entre 1 y 300', 'error');
             return true;
         }
@@ -62,9 +63,10 @@ export const Instagram = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // console.log(formValues);
+
         const isValidated = validate(formValues);
-        if(isValidated) setRows(getInstagramValues(formValues));
+
+        if (isValidated) setRows(getInstagramValues(formValues));
         // console.log(rows);
     }
 
@@ -72,104 +74,110 @@ export const Instagram = () => {
         <>
             <Card>
                 <CardContent>
-                    <Typography variant="h4" gutterBottom>
+                    <Typography variant='h4' gutterBottom>
                         Instagram
                         <Divider />
                     </Typography>
-                    <Grid container spacing={1}>
-                        <Grid item sm={6}>
-                            <form
-                                onSubmit={handleSubmit}
-                                id="paramForm"
-                                method="post"
-                            >
-                                <Grid container spacing={2}>
-                                    <Grid item sm={4}>
-                                        <TextField
-                                            id="txtUser"
-                                            name='user'
-                                            size='small'
-                                            label="Usuario"
-                                            onChange={handleInputChange}
-                                            value={user}
-                                        // style={{ width: '150px', height: '20px' }}
-                                        />
-                                    </Grid>
-                                    <Grid item sm={2}>
-                                        <TextField
-                                            id="txtNumPages"
-                                            name='numpages'
-                                            label="# páginas"
-                                            size='small'
-                                            type='number'
-                                            onChange={handleInputChange}
-                                            value={numpages}
-                                        // style={{ width: '50px', height: '20px' }}
-                                        />
-                                    </Grid>
-                                    <Grid item sm={3}>
-                                        <TextField
-                                            id="txtStartDate"
-                                            name='startdate'
-                                            label="Fecha desde"
-                                            size='small'
-                                            onChange={handleInputChange}
-                                            value={startdate}
-                                        />
-                                    </Grid>
-                                    <Grid item sm={3}>
-                                        <TextField
-                                            id="txtEndDate"
-                                            name='endtdate'
-                                            label="Fecha hasta"
-                                            size='small'
-                                            onChange={handleInputChange}
-                                            value={endtdate}
-                                        />
-                                    </Grid>
-                                </Grid>
-                                <br />
+                    <form
+                        onSubmit={handleSubmit}
+                        id='paramForm'
+                        method='post'
+                    >
+                        <Grid container spacing={2}>
+                            <Grid item sm={4}>
                                 <TextField
-                                    id="txtTopics"
-                                    name='topics'
-                                    label="Temas"
-                                    multiline
-                                    cols="50"
-                                    rows="5"
+                                    id='txtUser'
+                                    name='user'
                                     size='small'
+                                    label='Usuario'
                                     onChange={handleInputChange}
-                                    value={topics}
-                                    // onKeyDown={this.onKeyPress}
-                                    sx={{
-                                        width: '100%',
-                                        marginBottom: '8px'
-                                    }}
+                                    value={user}
                                 />
-                                <Button
-                                    size="large"
-                                    type='submit'
-                                    variant="contained"
-                                    startIcon={AppIcons.search}
-                                >Ver</Button>
-                            </form>
+                            </Grid>
+                            <Grid item sm={2}>
+                                <TextField
+                                    id='txtNumPages'
+                                    name='numpages'
+                                    label='# páginas'
+                                    size='small'
+                                    type='number'
+                                    onChange={handleInputChange}
+                                    value={numpages}
+                                />
+                            </Grid>
+                            <Grid item sm={3}>
+                                <LocalizationProvider dateAdapter={AdapterDateFns} locale={locale}>
+                                    <DatePicker
+                                        id='txtStartDate'
+                                        name='enddate'
+                                        renderInput={(props) => <TextField {...props} size='small' />}
+                                        label='Fecha desde'
+                                        value={startdate}
+                                        onChange={
+                                            (selectedDate) => {
+                                                handleInputChange({
+                                                    target: {
+                                                        name: 'startdate',
+                                                        value: moment(selectedDate).format('L')
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    />
+                                </LocalizationProvider>
+                            </Grid>
+                            <Grid item sm={3}>
+                                <LocalizationProvider dateAdapter={AdapterDateFns} locale={locale}>
+                                    <DatePicker
+                                        id='txtEndDate'
+                                        name='enddate'
+                                        renderInput={(props) => <TextField {...props} size='small' />}
+                                        label='Fecha hasta'
+                                        value={enddate}
+                                        onChange={
+                                            (selectedDate) => handleInputChange({
+                                                target: {
+                                                    name: 'enddate',
+                                                    value: moment(selectedDate).format('L')
+                                                }
+                                            })
+                                        }
+                                    />
+                                </LocalizationProvider>
+                            </Grid>
                         </Grid>
-                        <Grid item sm={6}>
-                        </Grid>
-                    </Grid>
+                        <br />
+                        <TextField
+                            id='txtTopics'
+                            name='topics'
+                            label='Temas'
+                            multiline
+                            cols='50'
+                            rows='5'
+                            size='small'
+                            onChange={handleInputChange}
+                            value={topics}
+                            // onKeyDown={this.onKeyPress}
+                            sx={{
+                                width: '100%',
+                                marginBottom: '8px'
+                            }}
+                        />
+                        <Button
+                            size='large'
+                            type='submit'
+                            variant='contained'
+                            startIcon={AppIcons.search}
+                        >Ver</Button>
+                    </form>
                 </CardContent>
-                {/* <Divider />
-            <CardActions sx={{
-                mx: 'auto',
-                width: 200,
-            }}>
-            </CardActions> */}
             </Card>
             <br />
             <DataGrid getRowId={row => row._id}
                 rows={rows}
                 columns={columns}
-                pageSize={(numpages * 1)}
-                rowsPerPageOptions={[(numpages * 1)]}
+                pageSize={10}
+                rowsPerPageOptions={[10]}
             // checkboxSelections
             />
         </>

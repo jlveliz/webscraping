@@ -22,10 +22,11 @@ export const fetchSocialData = async (url, data) => {
         return await response.json();
     } catch (error) {
         // console.log({error});
-        throw {
-            message: `
+        throw new Error(
+            `
             Problemas en la conexion con la API.
             (${url})
-        `};
+            `
+        );
     }
 }

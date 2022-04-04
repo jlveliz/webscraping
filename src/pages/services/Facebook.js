@@ -10,8 +10,8 @@ import Swal from 'sweetalert2';
 // Mis importaciones
 import { useForm } from '../../hooks/useForm';
 import { AppIcons } from '../../helpers/AppIcons';
-import { getInstagramValues } from '../../helpers/getInstagramValues';
 import { Bar, BarChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from 'recharts';
+import { getFacebookValues } from '../../helpers/getFacebookValues';
 
 const xAxisColor = blue['A700'];
 const today = new Date();
@@ -23,48 +23,57 @@ const initState = {
     topics: '',
 }
 
+const checkDateStartEnd = (start, end) => {
+    const mStart = moment(moment(start, 'dd/mm/yyyy'));
+    const mEnd = moment(moment(end, 'dd/mm/yyyy'));
+
+    return mEnd.isBefore(mStart);
+}
+
 export const Facebook = () => {
     const [formValues, handleInputChange] = useForm(initState);
     const { user, numpages, startdate, enddate, topics } = formValues;
     const [chartsData, setChartsData] = useState([]);
 
     const validate = ({ user, numpages, startdate, enddate, topics }) => {
-        const checkDate = () => {
-            const mStart = moment(moment(startdate, 'dd/mm/yyyy'));
-            const mEnd = moment(moment(enddate, 'dd/mm/yyyy'));
-            return mEnd.isBefore(mStart);
-        }
+        const swalTitle = 'Atencion';
+        const swalIcon = 'warning';
 
         if (user === '') {
-            Swal.fire('Error', 'Debe ingresar el usuario de Instagram a obtener datos', 'error');
+            Swal.fire(swalTitle, 'Debe ingresar el usuario de Instagram a obtener datos', swalIcon);
             return false;
         }
 
-        if (numpages > 50 || numpages < 1) {
-            Swal.fire('Error', 'Debe ingresar numero de paginas entre 1 y 300', 'error');
+        if (numpages > 30 || numpages < 1) {
+            Swal.fire(swalTitle, 'Debe ingresar numero de paginas entre 1 y 30', swalIcon);
             return true;
         }
 
-        if (checkDate()) {
-            Swal.fire('Error', 'La fecha final debe ser mayor a la inicial', 'error');
+        if (checkDateStartEnd(startdate, enddate)) {
+            Swal.fire(swalTitle, 'La fecha final debe ser mayor a la inicial', swalIcon);
             return false;
         }
 
         if (topics === '') {
-            Swal.fire('Error', 'Debe ingresar uno o mas temas de busqueda', 'error');
+            Swal.fire(swalTitle, 'Debe ingresar uno o mas temas de busqueda', swalIcon);
             return false;
         }
 
         return true;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async(e) => {
         e.preventDefault();
 
-        const isValidated = validate(formValues);
+        try {
+            const isValidated = validate(formValues);
 
-        if (isValidated) setChartsData(getInstagramValues(formValues));
-        // console.log(rows);
+            if (isValidated) setChartsData(await getFacebookValues(formValues));
+
+        } catch (error) {
+            Swal.fire('Error', error.message, 'error');
+            setChartsData([]);
+        }
     }
 
     return (

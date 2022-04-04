@@ -1,5 +1,5 @@
 import { DatePicker, LocalizationProvider } from '@mui/lab';
-import { Button, Card, CardContent, Checkbox, Divider, Grid, TextField, Typography } from '@mui/material';
+import { Button, Card, CardContent, Checkbox, CircularProgress, Divider, Grid, TextField, Typography } from '@mui/material';
 import { blue } from '@mui/material/colors';
 import { Bar, BarChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from 'recharts';
 import { useState } from 'react';
@@ -45,9 +45,9 @@ export const Twitter = () => {
             return false;
         }
 
-        if  (startdate === '' || enddate === '') {
+        if (startdate === '' || enddate === '') {
             Swal.fire(swalTitle, 'Debe ingresar fechas para la busqueda', swalIcon);
-            return ;
+            return;
         } else if (checkDateStartEnd(startdate, enddate)) {
             Swal.fire(swalTitle, 'La fecha final debe ser mayor a la inicial', swalIcon);
             return false;
@@ -77,11 +77,23 @@ export const Twitter = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         // console.log(formValues);
+        const isValidated = validate(formValues);
 
         try {
-            const isValidated = validate(formValues);
+            Swal.fire({
+                title: 'Espere por favor...',
+                text: '',
+                showCancelButton: false,
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+            });
+
 
             if (isValidated) setChartsData(await getTwitterValues(formValues));
+            Swal.close();
 
         } catch (error) {
             Swal.fire('Error', error.message, 'error');
@@ -111,7 +123,7 @@ export const Twitter = () => {
                                     label='Usuario'
                                     onChange={handleInputChange}
                                     value={user}
-                                    sx={{width: '100%'}}
+                                    sx={{ width: '100%' }}
                                 />
                             </Grid>
                             <Grid item sm={3}>
@@ -162,7 +174,7 @@ export const Twitter = () => {
                             size='small'
                             onChange={handleInputChange}
                             value={topics}
-                            sx={{width: '100%',marginBottom: '8px'}}
+                            sx={{ width: '100%', marginBottom: '8px' }}
                         />
                         <br />
                         <label htmlFor="replies">Obtener Replies&nbsp;</label>

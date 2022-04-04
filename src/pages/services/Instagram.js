@@ -62,13 +62,26 @@ export const Instagram = () => {
         return true;
     };
 
-    const handleSubmit = async(e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
+        const isValidated = validate(formValues);
+
         try {
-            const isValidated = validate(formValues);
+            Swal.fire({
+                title: 'Espere por favor...',
+                text: '',
+                showCancelButton: false,
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+            });
 
             if (isValidated) setChartsData(await getInstagramValues(formValues));
+
+            Swal.close();
 
         } catch (error) {
             Swal.fire('Error', error.message, 'error');

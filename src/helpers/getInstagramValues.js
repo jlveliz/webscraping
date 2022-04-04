@@ -25,42 +25,38 @@ const arrayOfRechartsData = (rechartsData, charTitle) => ({
     chartValues: rechartsData
 });
 
-export const getScrapingTotals = async ({ user, startdate, enddate, topics, replies }) => {
-    const api = (replies ? '/api3/twitterScrapingReplies' : '/api1/twitterScraping');
+const getScrapingTotals = async ({ user, numpages, startdate, enddate, topics }) => {
+    const api = '/api5/instagramScraping';
 
-    try {
-        // Llamo a la API para obtener lista archivos
-        const rawApiData = await fetchSocialData(
-            api,
-            {
-                fechai: startdate,
-                fechaf: enddate,
-                temas: topics,
-                user: user.toLowerCase(),
-                replies: replies
-            }
-        );
-        const { lista_archivos } = rawApiData;
+    // Llamo a la API para obtener lista archivos
+    const rawApiData = await fetchSocialData(
+        api,
+        {
+            fechai: startdate,
+            fechaf: enddate,
+            temas: topics,
+            user: user.toLowerCase(),
+            num_paginas: numpages
+        }
+    );
+    const { lista_archivos } = rawApiData;
 
-        // Llamo a la API para obtener los totales
-        const { lista_graficos } = await fetchSocialData(
-            '/api2/twitterSentiment',
-            {
-                lista_archivos: lista_archivos,
-                replies: replies
-            }
-        );
+    // Llamo a la API para obtener los totales
+    const { lista_graficos } = await fetchSocialData(
+        '/api2/twitterSentiment',
+        {
+            lista_archivos: lista_archivos,
+            replies: false
+        }
+    );
 
-        return lista_graficos;
-
-    } catch (error) {
-        throw error;
-    }
+    return lista_graficos;
 }
 
-export const getInstagramValues = () => {
+export const getInstagramValues = async (params) => {
     const newData = [];
-    const { jsons: chartsData } = rawTotalData;
+    // const { jsons: chartsData } = rawTotalData;
+    const chartsData = await getScrapingTotals(params);
     let data = [];
 
     for (const key in chartsData) {

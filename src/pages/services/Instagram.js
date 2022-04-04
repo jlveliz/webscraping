@@ -17,10 +17,17 @@ const xAxisColor = blue['A700'];
 const today = new Date();
 const initState = {
     user: '',
-    numpages: '10',
+    numpages: '',
     startdate: moment(today).format('L'),
     enddate: moment(today).add(1, 'days').format('L'),
     topics: '',
+}
+
+const checkDateStartEnd = (start, end) => {
+    const mStart = moment(moment(start, 'dd/mm/yyyy'));
+    const mEnd = moment(moment(end, 'dd/mm/yyyy'));
+
+    return mEnd.isBefore(mStart);
 }
 
 export const Instagram = () => {
@@ -29,42 +36,44 @@ export const Instagram = () => {
     const [chartsData, setChartsData] = useState([]);
 
     const validate = ({ user, numpages, startdate, enddate, topics }) => {
-        const checkDate = () => {
-            const mStart = moment(moment(startdate, 'dd/mm/yyyy'));
-            const mEnd = moment(moment(enddate, 'dd/mm/yyyy'));
-            return mEnd.isBefore(mStart);
-        }
+        const swalTitle = 'Atencion';
+        const swalIcon = 'warning';
 
         if (user === '') {
-            Swal.fire('Error', 'Debe ingresar el usuario de Instagram a obtener datos', 'error');
+            Swal.fire(swalTitle, 'Debe ingresar el usuario de Instagram a obtener datos', swalIcon);
             return false;
         }
 
-        if (numpages > 50 || numpages < 1) {
-            Swal.fire('Error', 'Debe ingresar numero de paginas entre 1 y 300', 'error');
+        if (numpages > 300 || numpages < 1) {
+            Swal.fire(swalTitle, 'Debe ingresar numero de paginas entre 1 y 300', swalIcon);
             return true;
         }
 
-        if (checkDate()) {
-            Swal.fire('Error', 'La fecha final debe ser mayor a la inicial', 'error');
+        if (checkDateStartEnd(startdate, enddate)) {
+            Swal.fire(swalTitle, 'La fecha final debe ser mayor a la inicial', swalIcon);
             return false;
         }
 
         if (topics === '') {
-            Swal.fire('Error', 'Debe ingresar uno o mas temas de busqueda', 'error');
+            Swal.fire(swalTitle, 'Debe ingresar uno o mas temas de busqueda', swalIcon);
             return false;
         }
 
         return true;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async(e) => {
         e.preventDefault();
 
-        const isValidated = validate(formValues);
+        try {
+            const isValidated = validate(formValues);
 
-        if (isValidated) setChartsData(getInstagramValues(formValues));
-        // console.log(rows);
+            if (isValidated) setChartsData(await getInstagramValues(formValues));
+
+        } catch (error) {
+            Swal.fire('Error', error.message, 'error');
+            setChartsData([]);
+        }
     }
 
     return (
@@ -126,8 +135,6 @@ export const Instagram = () => {
                             <Grid item sm={3}>
                                 <LocalizationProvider dateAdapter={AdapterDateFns} locale={locale}>
                                     <DatePicker
-                                        // id='txtEndDate'
-                                        // name='enddate'
                                         renderInput={(props) => <TextField {...props} size='small' />}
                                         label='Fecha hasta'
                                         value={enddate}
@@ -160,12 +167,7 @@ export const Instagram = () => {
                                 marginBottom: '8px'
                             }}
                         />
-                        <Button
-                            size='large'
-                            type='submit'
-                            variant='contained'
-                            startIcon={AppIcons.search}
-                        >Ver</Button>
+                        <Button size='large' type='submit' variant='contained' startIcon={AppIcons.search} >Ver</Button>
                     </form>
                 </CardContent>
             </Card>

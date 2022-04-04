@@ -15,13 +15,14 @@ import { getTwitterValues } from '../../helpers/getTwitterValues';
 
 const xAxisColor = blue['A700'];
 const today = new Date();
-const oneWeekBack = moment(today).add(-7, 'days').format('L');
+const oneWeekBack = moment(today).subtract(7, 'days').format('L');
 const initState = {
     user: '',
     startdate: moment(today).format('L'),
     enddate: moment(today).add(1, 'days').format('L'),
     topics: '',
     replies: false,
+    undetermined: false
 }
 
 const checkDateStartEnd = (start, end) => {
@@ -33,7 +34,7 @@ const checkDateStartEnd = (start, end) => {
 
 export const Twitter = () => {
     const [formValues, handleInputChange] = useForm(initState);
-    const { user, startdate, enddate, topics, replies } = formValues;
+    const { user, startdate, enddate, topics, replies, undetermined } = formValues;
     const [chartsData, setChartsData] = useState([]);
 
     const validate = ({ user, startdate, enddate, topics, replies }) => {
@@ -189,6 +190,22 @@ export const Twitter = () => {
                                 (e) => handleInputChange({
                                     target: {
                                         name: 'replies',
+                                        value: e.target.checked
+                                    }
+                                })
+                            }
+                        />
+                        <br />
+                        <label htmlFor="replies">Mostrar Undetermined&nbsp;</label>
+                        <Checkbox
+                            inputProps={{
+                                'aria-label': 'controlled',
+                                checked: undetermined
+                            }}
+                            onChange={
+                                (e) => handleInputChange({
+                                    target: {
+                                        name: 'undetermined',
                                         value: e.target.checked
                                     }
                                 })

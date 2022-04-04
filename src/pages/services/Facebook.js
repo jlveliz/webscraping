@@ -1,5 +1,5 @@
 import { DatePicker, LocalizationProvider } from '@mui/lab';
-import { Button, Card, CardContent, Divider, Grid, TextField, Typography } from '@mui/material';
+import { Button, Card, CardContent, Checkbox, Divider, Grid, TextField, Typography } from '@mui/material';
 import { blue } from '@mui/material/colors';
 import { useState } from 'react';
 import moment from 'moment';
@@ -17,10 +17,11 @@ const xAxisColor = blue['A700'];
 const today = new Date();
 const initState = {
     user: '',
-    numpages: '10',
+    numpages: '5',
     startdate: moment(today).format('L'),
     enddate: moment(today).add(1, 'days').format('L'),
     topics: '',
+    undetermined: false
 }
 
 const checkDateStartEnd = (start, end) => {
@@ -32,7 +33,7 @@ const checkDateStartEnd = (start, end) => {
 
 export const Facebook = () => {
     const [formValues, handleInputChange] = useForm(initState);
-    const { user, numpages, startdate, enddate, topics } = formValues;
+    const { user, numpages, startdate, enddate, topics, undetermined } = formValues;
     const [chartsData, setChartsData] = useState([]);
 
     const validate = ({ user, numpages, startdate, enddate, topics }) => {
@@ -46,7 +47,7 @@ export const Facebook = () => {
 
         if (numpages > 30 || numpages < 1) {
             Swal.fire(swalTitle, 'Debe ingresar numero de paginas entre 1 y 30', swalIcon);
-            return true;
+            return false;
         }
 
         if (checkDateStartEnd(startdate, enddate)) {
@@ -184,6 +185,23 @@ export const Facebook = () => {
                                 marginBottom: '8px'
                             }}
                         />
+                        <br />
+                        <label htmlFor="replies">Mostrar Undetermined&nbsp;</label>
+                        <Checkbox
+                            inputProps={{
+                                'aria-label': 'controlled',
+                                checked: undetermined
+                            }}
+                            onChange={
+                                (e) => handleInputChange({
+                                    target: {
+                                        name: 'undetermined',
+                                        value: e.target.checked
+                                    }
+                                })
+                            }
+                        />
+                        <br />
                         <Button
                             size='large'
                             type='submit'

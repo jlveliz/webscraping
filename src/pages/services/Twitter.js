@@ -1,213 +1,221 @@
-import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import { DatePicker, LocalizationProvider } from '@mui/lab';
-import { Button, Card, CardActions, CardContent, Checkbox, Divider, TextField, Typography } from '@mui/material';
+import { Button, Card, CardContent, Checkbox, Divider, Grid, TextField, Typography } from '@mui/material';
+import { blue } from '@mui/material/colors';
 import { Bar, BarChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from 'recharts';
-import { Grid } from '@material-ui/core';
-
-// Mis imports
-import { AppIcons } from '../../helpers/AppIcons';
-// Datos
-import sentimentsData from '../../assets/jsons/sentiment.json';
-import { useForm } from '../../hooks/useForm';
 import { useState } from 'react';
-import { getUsers } from '../../helpers/getTwitterValues';
+import moment from 'moment';
+import AdapterDateFns from '@mui/lab/AdapterDateFns';
+import locale from 'date-fns/locale/es';
+import Swal from 'sweetalert2';
 
-const sentiments = JSON.parse(sentimentsData);
-// console.log(sentiments);
+// Mis importaciones
+import { useForm } from '../../hooks/useForm';
+import { AppIcons } from '../../helpers/AppIcons';
+import { getTwitterValues } from '../../helpers/getTwitterValues';
 
-let data = [];
-let totalPos = 0;
-let totalNeg = 0;
-let totalUnd = 0;
-
-const users = getUsers(sentiments);
-const oUsers = users.map((user) => ({ [user]: 0 }));
-
-sentiments.forEach(sentiment => {
-
-    switch (sentiment.sentiment_pred) {
-        case 'Positive':
-            totalPos++;
-
-            break;
-        case 'Undetermined': totalUnd++; break;
-        case 'Negative': totalNeg++; break;
-        default: console.log(sentiment.sentiment_pred); break;
-    }
-    // console.log({ totalNeg, totalPos });
-});
-
-data.push(
-    { name: 'Neutral', pv: totalUnd },
-    { name: 'Positivos', pv: totalPos },
-    { name: 'Negativos', pv: totalNeg },
-);
-// data.push({
-//     name: 'Sentimientos',
-//     positivos: totalPos,
-//     negativos: totalNeg,
-//     amt: 0
-// });
-
-const today = new Date().toLocaleDateString().split(' ')[0];
+const xAxisColor = blue['A700'];
+const today = new Date();
+const oneWeekBack = moment(today).add(-7, 'days').format('L');
 const initState = {
-    twitterUser: 'CRGUERRERO',
-    replies: false,
+    user: '',
+    startdate: moment(today).format('L'),
+    enddate: moment(today).add(1, 'days').format('L'),
     topics: '',
-    startDate: today,
-    endDate: today,
-};
+    replies: false,
+}
+
+const checkDateStartEnd = (start, end) => {
+    const mStart = moment(moment(start, 'dd/mm/yyyy'));
+    const mEnd = moment(moment(end, 'dd/mm/yyyy'));
+
+    return mEnd.isBefore(mStart);
+}
 
 export const Twitter = () => {
-
     const [formValues, handleInputChange] = useForm(initState);
-    const { twitterUser, replies, topics, startDate, endDate } = formValues;
+    const { user, startdate, enddate, topics, replies } = formValues;
+    const [chartsData, setChartsData] = useState([]);
 
-    // console.log(startDate);
+    const validate = ({ user, startdate, enddate, topics, replies }) => {
+        const swalTitle = 'Atencion';
+        const swalIcon = 'warning';
 
-    // Funciones
-    const handleDateChange = () => {
-        console.log('aqui tamos');
+        if (user === '') {
+            Swal.fire(swalTitle, 'Debe ingresar el usuario de Instagram a obtener datos', swalIcon);
+            return false;
+        }
+
+        if  (startdate === '' || enddate === '') {
+            Swal.fire(swalTitle, 'Debe ingresar fechas para la busqueda', swalIcon);
+            return ;
+        } else if (checkDateStartEnd(startdate, enddate)) {
+            Swal.fire(swalTitle, 'La fecha final debe ser mayor a la inicial', swalIcon);
+            return false;
+        }
+
+        if (topics === '') {
+            Swal.fire(swalTitle, 'Debe ingresar uno o mas temas de busqueda', swalIcon);
+            return false;
+        }
+
+        if (replies) {
+            if (user !== '') {
+                Swal.fire(swalTitle, 'No es posible buscar replies y usuario especifico al mismo tiempo', swalIcon);
+                return false;
+            }
+
+            if (checkDateStartEnd(oneWeekBack, startdate)) {
+                Swal.fire(swalTitle, 'Debe ingresar fecha inicial de hasta una semana atras para obtener replies', swalIcon);
+                return false;
+            }
+        }
+
+
+        return true;
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        // console.log(formValues);
+
+        try {
+            const isValidated = validate(formValues);
+
+            if (isValidated) setChartsData(await getTwitterValues(formValues));
+
+        } catch (error) {
+            Swal.fire('Error', error.message, 'error');
+            setChartsData([]);
+        }
     }
 
     return (
         <>
-
-
-            {/* <Card sx={{ minWidth: 275 }}> */}
             <Card>
                 <CardContent>
-                    <Typography
-                        variant="h3"
-                        gutterBottom
-                    >
+                    <Typography variant='h4' gutterBottom>
                         Twitter
                         <Divider />
                     </Typography>
-
-
-
-                    <Grid
-                        container
-                        spacing={2}
-                        direction="row"
-                        justifyContent="flex-end"
-                        alignItems="center"
+                    <form
+                        onSubmit={handleSubmit}
+                        id='paramForm'
+                        method='post'
                     >
-                        <Grid item lg={6}>
-                            <form
-                                // onSubmit={this.handleSubmit}
-                                id="paramForm"
-                                method="post" date
-                            >
-                                <Grid container >
-                                    <Grid item sm={4}>
-                                        <TextField
-                                            id="txtTwitterUser"
-                                            name='twitterUser'
-                                            label="Twitter user"
-                                            // variant="standard"
-                                            size="small"
-                                            value={twitterUser}
-                                            onChange={handleInputChange}
-                                        />
-                                    </Grid>
-                                    <Grid item sm={4}>
-                                        <TextField
-                                            id="txtStartDate"
-                                            name='startDate'
-                                            label="Fecha desde"
-                                            // type="date"
-                                            size="small"
-                                            onChange={handleInputChange}
-                                            value={startDate}
-                                        />
-                                    </Grid>
-                                    <Grid item sm={4}>
-                                        <TextField
-                                            id="txtEndDate"
-                                            name='endtDate'
-                                            label="Fecha hasta"
-                                            // type="date"
-                                            size="small"
-                                            onChange={handleInputChange}
-                                            value={endDate}
-                                        />
-                                    </Grid>
-
-                                </Grid>
-                                <br />
+                        <Grid container spacing={2}>
+                            <Grid item sm={6}>
                                 <TextField
-                                    id="txtTopics"
-                                    name='topics'
-                                    label="Temas"
-                                    multiline
-                                    rows="5"
-                                    size="small"
-                                    sx={{ width: '100%' }}
+                                    id='txtUser'
+                                    name='user'
+                                    size='small'
+                                    label='Usuario'
                                     onChange={handleInputChange}
-                                    value={topics}
+                                    value={user}
+                                    sx={{width: '100%'}}
                                 />
-                                <br />
-                                <label htmlFor="replies">Obtener Replies&nbsp;</label>
-                                <Checkbox
-                                    inputProps={{
-                                        'aria-label': 'controlled',
-                                        name: 'replicar',
-                                        checked: replies
-                                    }}
-                                />
-                                {/* <div id="inner_med">
-                                    <span>
-                                        {procesando}
-                                    </span>
-                                </div> */}
-                                <br />
-                                <br />
-                                <Button
-                                    variant="contained"
-                                    size="large"
-                                    startIcon={AppIcons.search}
-                                >Ver</Button>
-                            </form>
+                            </Grid>
+                            <Grid item sm={3}>
+                                <LocalizationProvider dateAdapter={AdapterDateFns} locale={locale}>
+                                    <DatePicker
+                                        renderInput={(props) => <TextField {...props} size='small' />}
+                                        label='Fecha desde'
+                                        value={startdate}
+                                        onChange={
+                                            (selectedDate) => {
+                                                handleInputChange({
+                                                    target: {
+                                                        name: 'startdate',
+                                                        value: moment(selectedDate).format('L')
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    />
+                                </LocalizationProvider>
+                            </Grid>
+                            <Grid item sm={3}>
+                                <LocalizationProvider dateAdapter={AdapterDateFns} locale={locale}>
+                                    <DatePicker
+                                        renderInput={(props) => <TextField {...props} size='small' />}
+                                        label='Fecha hasta'
+                                        value={enddate}
+                                        onChange={
+                                            (selectedDate) => handleInputChange({
+                                                target: {
+                                                    name: 'enddate',
+                                                    value: moment(selectedDate).format('L')
+                                                }
+                                            })
+                                        }
+                                    />
+                                </LocalizationProvider>
+                            </Grid>
                         </Grid>
-                        <Grid item lg={6}>
-
-                            <Typography variant="h5">
-                                Todos
-                            </Typography>
-                            <BarChart
-                                width={500}
-                                height={300}
-                                data={data}
-                                margin={{
-                                    top: 5,
-                                    right: 30,
-                                    left: 20,
-                                    bottom: 5,
-                                }}
-                            >
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="name" />
-                                <YAxis />
-                                <Tooltip />
-                                <Legend />
-                                <Bar dataKey="pv" fill="#8884d8" name='#ADNESPOL' />
-                            </BarChart>
-
-
-                        </Grid>
-                    </Grid>
-
-
+                        <br />
+                        <TextField
+                            id='txtTopics'
+                            name='topics'
+                            label='Temas'
+                            multiline
+                            cols='50'
+                            rows='5'
+                            size='small'
+                            onChange={handleInputChange}
+                            value={topics}
+                            sx={{width: '100%',marginBottom: '8px'}}
+                        />
+                        <br />
+                        <label htmlFor="replies">Obtener Replies&nbsp;</label>
+                        <Checkbox
+                            inputProps={{
+                                'aria-label': 'controlled',
+                                checked: replies
+                            }}
+                            onChange={
+                                (e) => handleInputChange({
+                                    target: {
+                                        name: 'replies',
+                                        value: e.target.checked
+                                    }
+                                })
+                            }
+                        />
+                        <br />
+                        <Button size='large' type='submit' variant='contained' startIcon={AppIcons.search} >Ver</Button>
+                    </form>
                 </CardContent>
-                {/* <Divider />
-                <CardActions sx={{
-                    mx: 'auto',
-                    width: 200,
-                }}>
-                </CardActions> */}
             </Card>
+            <br />
+            <Grid container spacing={1}>
+                {
+                    chartsData.map(
+                        (chart) => (
+                            <Grid item md key={chart._id}>
+                                <h1>{chart.title}</h1>
+                                <BarChart
+                                    width={800}
+                                    height={300}
+                                    data={chart.chartValues}
+                                    margin={{
+                                        top: 5,
+                                        right: 30,
+                                        left: 20,
+                                        bottom: 75,
+                                    }}
+                                >
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="name" fontSize={14} interval={0} angle={-15} textAnchor="end" />
+                                    <YAxis />
+                                    <Tooltip />
+                                    <Legend />
+                                    {/* <Bar dataKey="pv" fill="#8884d8" name='#ADNESPOL' /> */}
+                                    <Bar dataKey="total" fill={xAxisColor} opacity={0.7} textAnchor="end" />
+                                </BarChart>
+                            </Grid>
+                        )
+                    )
+                }
+            </Grid>
         </>
     )
 }

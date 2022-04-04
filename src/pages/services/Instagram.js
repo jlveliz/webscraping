@@ -184,16 +184,16 @@ export const Instagram = () => {
                                         top: 5,
                                         right: 30,
                                         left: 20,
-                                        bottom: 5,
+                                        bottom: 75,
                                     }}
                                 >
                                     <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="name" fontSize={14} />
+                                    <XAxis dataKey="name" fontSize={14} interval={0} angle={-15} textAnchor="end" />
                                     <YAxis />
                                     <Tooltip />
                                     <Legend />
                                     {/* <Bar dataKey="pv" fill="#8884d8" name='#ADNESPOL' /> */}
-                                    <Bar dataKey="total" fill={xAxisColor} opacity={0.7} />
+                                    <Bar dataKey="total" fill={xAxisColor} opacity={0.7} textAnchor="end" />
                                 </BarChart>
                             </Grid>
                         )

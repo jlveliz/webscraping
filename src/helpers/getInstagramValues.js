@@ -1,11 +1,64 @@
-import instagramData from '../assets/jsons/sentiment_instagram.json';
 import rawTotalData from '../assets/jsons/totales_twitter_no-replies_json.json';
+import { fetchSocialData } from './fetchSocialData';
 
-const instagram = instagramData.map((data, index) => ({ ...data, _id: (index + 1) }));
+const toRechartsData = (oData) => {
+    // El orden del oData.[key] es importante
+    // no se debe de cambiar
+    // 1.- sentiment_pred
+    // 2.- Username
+    // 3.- tema
+    const values = ((oData?.sentiment_pred || oData.Username) || oData?.tema);
+    const data = [];
 
-export const getInstagramValues = ({ user, numpages, startdate, endtdate, topics }) => {
-    const allUser = user === '';
-    // const newData = instagram.filter((data) => (data.Username === user || allUser));
+    for (const xAxisName in values) {
+        data.push({
+            name: xAxisName,
+            total: values[xAxisName]
+        });
+    }
+    return data;
+}
+
+const arrayOfRechartsData = (rechartsData, charTitle) => ({
+    _id: Math.random() * (10000 - 1) + 1,
+    title: charTitle.toLocaleUpperCase(),
+    chartValues: rechartsData
+});
+
+export const getScrapingTotals = async ({ user, startdate, enddate, topics, replies }) => {
+    const api = (replies ? '/api3/twitterScrapingReplies' : '/api1/twitterScraping');
+
+    try {
+        // Llamo a la API para obtener lista archivos
+        const rawApiData = await fetchSocialData(
+            api,
+            {
+                fechai: startdate,
+                fechaf: enddate,
+                temas: topics,
+                user: user.toLowerCase(),
+                replies: replies
+            }
+        );
+        const { lista_archivos } = rawApiData;
+
+        // Llamo a la API para obtener los totales
+        const { lista_graficos } = await fetchSocialData(
+            '/api2/twitterSentiment',
+            {
+                lista_archivos: lista_archivos,
+                replies: replies
+            }
+        );
+
+        return lista_graficos;
+
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const getInstagramValues = () => {
     const newData = [];
     const { jsons: chartsData } = rawTotalData;
     let data = [];
@@ -16,66 +69,18 @@ export const getInstagramValues = ({ user, numpages, startdate, endtdate, topics
         else if (key !== 'temas' && typeof chartsData[key][0] === 'string') chartsData[key] = chartsData[key].map(JSON.parse);
 
         if (key === 'temas') {
-            data = [];
-
-            for (const xAxisName in chartsData[key].tema) {
-                data.push(
-                    {
-                        name: xAxisName,
-                        total: chartsData[key].tema[xAxisName]
-                    }
-                );
-            }
-            newData.push({
-                _id: key,
-                title: key.toLocaleUpperCase(),
-                chartValues: data
-            });
+            data = toRechartsData(chartsData[key]);
+            newData.push(arrayOfRechartsData(data, key));
 
         } else {
-            console.log(key);
-            console.log(chartsData);
-
             for (const index in chartsData[key]) {
-                data = [];
-                // console.log(chartsData[key][index], index);
-                const values = (chartsData[key][index]?.sentiment_pred || chartsData[key][index].Username);
-                for (const xAxisName in values) {
-                    // console.log(Object.keys(chartsData[key][index]), chartsData[key][index].tema, xAxisName);
-                    data.push(
-                        {
-                            name: xAxisName,
-                            total: values[xAxisName]
-                        }
-                    );
-                }
+                data = toRechartsData(chartsData[key][index]);
             }
 
-            newData.push({
-                _id: key,
-                title: key.toLocaleUpperCase(),
-                chartValues: data
-            });
+            newData.push(arrayOfRechartsData(data, key));
 
         }
-
-        // console.log(key);
-        // console.log(chartsData[key]);
     }
-
-    console.log(data);
-
-    // Traer la data de API 5
-    // const { newData: data } = postData(
-    //     '/api5/instagramScraping',
-    //     {
-    //         fechai: startdate,
-    //         fechaf: endtdate,
-    //         temas: topics,
-    //         user: user,
-    //         num_paginas: numpages
-    //     }
-    // );
-
+    // console.log(newData);
     return newData;
 }

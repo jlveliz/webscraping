@@ -68,20 +68,22 @@ export const Facebook = () => {
         const isValidated = validate(formValues);
 
         try {
-            Swal.fire({
-                title: 'Espere por favor...',
-                text: '',
-                showCancelButton: false,
-                showConfirmButton: false,
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                },
-            });
+            if (isValidated) {
+                Swal.fire({
+                    title: 'Espere por favor...',
+                    text: '',
+                    showCancelButton: false,
+                    showConfirmButton: false,
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                });
 
-            if (isValidated) setChartsData(await getFacebookValues(formValues));
+                setChartsData(await getFacebookValues(formValues));
 
-            Swal.close();
+                Swal.close();
+            }
 
         } catch (error) {
             Swal.fire('Error', error.message, 'error');

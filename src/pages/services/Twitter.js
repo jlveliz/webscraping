@@ -1,5 +1,5 @@
 import { DatePicker, LocalizationProvider } from '@mui/lab';
-import { Button, Card, CardContent, Checkbox, CircularProgress, Divider, Grid, TextField, Typography } from '@mui/material';
+import { Button, Card, CardContent, Checkbox, Divider, Grid, TextField, Typography } from '@mui/material';
 import { blue } from '@mui/material/colors';
 import { Bar, BarChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from 'recharts';
 import { useState } from 'react';
@@ -80,20 +80,22 @@ export const Twitter = () => {
         const isValidated = validate(formValues);
 
         try {
-            Swal.fire({
-                title: 'Espere por favor...',
-                text: '',
-                showCancelButton: false,
-                showConfirmButton: false,
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                },
-            });
+            if (isValidated) {
+                Swal.fire({
+                    title: 'Espere por favor...',
+                    text: '',
+                    showCancelButton: false,
+                    showConfirmButton: false,
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                });
 
+                setChartsData(await getTwitterValues(formValues));
 
-            if (isValidated) setChartsData(await getTwitterValues(formValues));
-            Swal.close();
+                Swal.close();
+            }
 
         } catch (error) {
             Swal.fire('Error', error.message, 'error');

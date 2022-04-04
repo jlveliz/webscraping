@@ -55,8 +55,8 @@ const getScrapingTotals = async ({ user, startdate, enddate, topics, replies }) 
 
 export const getTwitterValues = async(params) => {
     const newData = [];
-    // const { jsons: chartsData } = rawTotalData;
-    const chartsData = await getScrapingTotals(params);
+    const { jsons: chartsData } = rawTotalData;
+    // const chartsData = await getScrapingTotals(params);
     let data = [];
 
     for (const key in chartsData) {

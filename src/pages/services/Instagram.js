@@ -68,20 +68,22 @@ export const Instagram = () => {
         const isValidated = validate(formValues);
 
         try {
-            Swal.fire({
-                title: 'Espere por favor...',
-                text: '',
-                showCancelButton: false,
-                showConfirmButton: false,
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                },
-            });
+            if (isValidated) {
+                Swal.fire({
+                    title: 'Espere por favor...',
+                    text: '',
+                    showCancelButton: false,
+                    showConfirmButton: false,
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                });
 
-            if (isValidated) setChartsData(await getInstagramValues(formValues));
+                setChartsData(await getInstagramValues(formValues));
 
-            Swal.close();
+                Swal.close();
+            }
 
         } catch (error) {
             Swal.fire('Error', error.message, 'error');
@@ -111,6 +113,7 @@ export const Instagram = () => {
                                     label='Usuario'
                                     onChange={handleInputChange}
                                     value={user}
+                                    sx={{ width: '100%' }}
                                 />
                             </Grid>
                             <Grid item sm={2}>

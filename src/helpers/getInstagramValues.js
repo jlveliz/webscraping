@@ -55,8 +55,8 @@ const getScrapingTotals = async ({ user, numpages, startdate, enddate, topics })
 
 export const getInstagramValues = async (params) => {
     const newData = [];
-    // const { jsons: chartsData } = rawTotalData;
-    const chartsData = await getScrapingTotals(params);
+    const { jsons: chartsData } = rawTotalData;
+    // const chartsData = await getScrapingTotals(params);
     let data = [];
 
     for (const key in chartsData) {

@@ -1,6 +1,6 @@
 import { DatePicker, LocalizationProvider } from '@mui/lab';
 import { Button, Card, CardContent, Checkbox, Divider, Grid, TextField, Typography } from '@mui/material';
-import { blue } from '@mui/material/colors';
+import { Bar, BarChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from 'recharts';
 import { useState } from 'react';
 import moment from 'moment';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
@@ -10,10 +10,10 @@ import Swal from 'sweetalert2';
 // Mis importaciones
 import { useForm } from '../../hooks/useForm';
 import { AppIcons } from '../../helpers/AppIcons';
-import { Bar, BarChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from 'recharts';
 import { getFacebookValues } from '../../helpers/getFacebookValues';
 
-const xAxisColor = blue['A700'];
+const barColor = '#CDD4EC';
+const barBorderColor = '#515E87';
 const today = new Date();
 const initState = {
     user: '',
@@ -234,8 +234,7 @@ export const Facebook = () => {
                                     <YAxis />
                                     <Tooltip />
                                     <Legend />
-                                    {/* <Bar dataKey="pv" fill="#8884d8" name='#ADNESPOL' /> */}
-                                    <Bar dataKey="total" fill={xAxisColor} opacity={0.7} textAnchor="end" />
+                                    <Bar dataKey="total" name='Total' stroke={barBorderColor} fill={barColor} opacity={0.7} textAnchor="end" />
                                 </BarChart>
                             </Grid>
                         )

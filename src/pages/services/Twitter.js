@@ -1,6 +1,5 @@
 import { DatePicker, LocalizationProvider } from '@mui/lab';
 import { Button, Card, CardContent, Checkbox, Divider, Grid, TextField, Typography } from '@mui/material';
-import { blue } from '@mui/material/colors';
 import { Bar, BarChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from 'recharts';
 import { useState } from 'react';
 import moment from 'moment';
@@ -13,7 +12,8 @@ import { useForm } from '../../hooks/useForm';
 import { AppIcons } from '../../helpers/AppIcons';
 import { getTwitterValues } from '../../helpers/getTwitterValues';
 
-const xAxisColor = blue['A700'];
+const barColor = '#CDD4EC';
+const barBorderColor = '#515E87';
 const today = new Date();
 const oneWeekBack = moment(today).subtract(7, 'days').format('L');
 const initState = {
@@ -239,8 +239,7 @@ export const Twitter = () => {
                                     <YAxis />
                                     <Tooltip />
                                     <Legend />
-                                    {/* <Bar dataKey="pv" fill="#8884d8" name='#ADNESPOL' /> */}
-                                    <Bar dataKey="total" fill={xAxisColor} opacity={0.7} textAnchor="end" />
+                                    <Bar dataKey="total" name='Total' stroke={barBorderColor} fill={barColor} opacity={0.7} textAnchor="end" />
                                 </BarChart>
                             </Grid>
                         )

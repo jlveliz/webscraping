@@ -1,6 +1,6 @@
 import { DatePicker, LocalizationProvider } from '@mui/lab';
 import { Button, Card, CardContent, Checkbox, Divider, Grid, TextField, Typography } from '@mui/material';
-import { blue } from '@mui/material/colors';
+import { Bar, BarChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from 'recharts';
 import { useState } from 'react';
 import moment from 'moment';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
@@ -11,9 +11,9 @@ import Swal from 'sweetalert2';
 import { useForm } from '../../hooks/useForm';
 import { AppIcons } from '../../helpers/AppIcons';
 import { getInstagramValues } from '../../helpers/getInstagramValues';
-import { Bar, BarChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from 'recharts';
 
-const xAxisColor = blue['A700'];
+const barColor = '#CDD4EC';
+const barBorderColor = '#515E87';
 const today = new Date();
 const initState = {
     user: '',
@@ -228,8 +228,7 @@ export const Instagram = () => {
                                     <YAxis />
                                     <Tooltip />
                                     <Legend />
-                                    {/* <Bar dataKey="pv" fill="#8884d8" name='#ADNESPOL' /> */}
-                                    <Bar dataKey="total" fill={xAxisColor} opacity={0.7} textAnchor="end" />
+                                    <Bar dataKey="total" name='Total' stroke={barBorderColor} fill={barColor} opacity={0.7} textAnchor="end" />
                                 </BarChart>
                             </Grid>
                         )

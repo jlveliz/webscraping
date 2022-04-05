@@ -90,6 +90,8 @@ export const Twitter = () => {
                     allowOutsideClick: false,
                     didOpen: () => {
                         Swal.showLoading();
+
+                        
                     },
                 });
 

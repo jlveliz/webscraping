@@ -1,4 +1,5 @@
-import rawTotalData from '../assets/jsons/totales_twitter_no-replies_json.json';
+// import rawTotalData from '../assets/jsons/totales_twitter_no-replies_json.json';
+import rawTotalData from '../assets/jsons/totales_twitter_no-replies_jsonv2.json';
 import { fetchSocialData } from './fetchSocialData';
 import { arrayOfRechartsData, toRechartsData } from './getRechartsArrays';
 
@@ -31,11 +32,11 @@ const getScrapingTotals = async ({ user, numpages, startdate, enddate, topics })
 }
 
 export const getFacebookValues = async (params) => {
-    const excludes = {'Undetermined' : (params.undetermined? '1' : '0') };
+    const excludes = { 'Undetermined': (params.undetermined ? '1' : '0') };
     const newData = [];
     const { jsons: chartsData } = rawTotalData;
     // const chartsData = await getScrapingTotals(params);
-    let data = [];
+    let data = [], title = '';
 
     for (const key in chartsData) {
         // Convertir los JSON string a object
@@ -43,15 +44,19 @@ export const getFacebookValues = async (params) => {
         else if (key !== 'temas' && typeof chartsData[key][0] === 'string') chartsData[key] = chartsData[key].map(JSON.parse);
 
         if (key === 'temas') {
+            title = key;
             data = toRechartsData(chartsData[key], excludes);
-            newData.push(arrayOfRechartsData(data, key));
+            newData.push(arrayOfRechartsData(data, title));
 
         } else {
-            for (const index in chartsData[key]) {
-                data = toRechartsData(chartsData[key][index], excludes);
-            }
 
-            newData.push(arrayOfRechartsData(data, key));
+            for (const index in chartsData[key]) {
+                // Colocar el nombre del tema si viene en el arreglo
+                const temaName = Object.values(chartsData[key][index]?.tema || {})[0] || '';
+                title = key + (temaName == '' ? '' : ` (${temaName})`);
+                data = toRechartsData(chartsData[key][index], excludes);
+                newData.push(arrayOfRechartsData(data, title));
+            }
 
         }
     }
